@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self'">
+<meta name="robots" content="noindex">
+<title>Приглашение в Pulse</title>
+<style>
+  :root { color-scheme: dark; --bg: #111018; --side: #191721; --panel: #211e2e; --line: #302b3e; --text: #efedf7; --muted: #9991ad; --accent: #b79af5; --soft: #332941; --green: #65d6b3; --red: #ee7087; }
+  @media (prefers-color-scheme: light) {
+    :root { color-scheme: light; --bg: #f7f5fa; --side: #eeebf3; --panel: #e6e0ee; --line: #d6cede; --text: #2a2237; --muted: #736782; --accent: #7650ad; --soft: #dfd2f2; --green: #237e65; --red: #b62c4b; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: radial-gradient(ellipse at center, #2b203d 0, transparent 60%), var(--bg); color: var(--text); font: 15px/1.55 'Segoe UI', system-ui, sans-serif; }
+  @media (prefers-color-scheme: light) { body { background: radial-gradient(ellipse at center, #e5d9f5 0, transparent 60%), var(--bg); } }
+  main { width: 520px; max-width: 100%; padding: 36px 32px; border: 1px solid var(--line); border-radius: 24px; background: var(--side); }
+  .logo { display: flex; align-items: center; gap: 12px; font-size: 20px; letter-spacing: 6px; color: var(--accent); font-weight: 600; }
+  .logo img { width: 36px; height: 36px; border-radius: 10px; }
+  h1 { font-size: 26px; letter-spacing: -0.5px; margin: 26px 0 8px; }
+  p { margin: 6px 0 14px; color: var(--muted); }
+  .buttons { display: flex; flex-direction: column; gap: 10px; margin: 24px 0 8px; }
+  a.button, button { font: inherit; display: block; text-align: center; text-decoration: none; padding: 13px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--text); cursor: pointer; }
+  a.button:hover, button:hover { background: var(--soft); }
+  .primary { background: var(--accent) !important; color: #21162f !important; border-color: transparent !important; font-weight: 600; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  ol { padding-left: 20px; color: var(--muted); margin: 18px 0 0; }
+  li { margin: 6px 0; }
+  .note { font-size: 13px; padding: 10px 12px; border-radius: 10px; background: #3c3024; color: #e5c493; margin: 16px 0 0; }
+  @media (prefers-color-scheme: light) { .note { background: #f5e3cc; color: #6d4410; } }
+  .bad { color: var(--red); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <div class="logo"><img src="../docs/logo.png" alt="">PULSE</div>
+
+  <section id="ok" hidden>
+    <h1>Тебя пригласили в Pulse</h1>
+    <p>Голос, чат и игры с друзьями — со сквозным шифрованием. Открываем приложение…</p>
+    <div class="buttons">
+      <a class="button primary" id="open" href="#">Открыть в Pulse</a>
+      <a class="button" href="https://github.com/AfterAlotLies/pulse-releases/releases/latest">Скачать Pulse для Windows</a>
+      <button type="button" id="copy">Скопировать код приглашения</button>
+    </div>
+    <ol>
+      <li>Нет Pulse? Скачай и установи — <a href="https://github.com/AfterAlotLies/pulse-releases#readme" style="color: var(--accent)">как установить</a>.</li>
+      <li>Вернись к этой ссылке и нажми «Открыть в Pulse» — или вставь скопированный код на экране регистрации.</li>
+      <li>Придумай ник и пароль — и ты в группе.</li>
+    </ol>
+    <div class="note">Код одноразовый и действует 24 часа. Не пересылай его: в нём ключ доступа к переписке.</div>
+  </section>
+
+  <section id="bad" hidden>
+    <h1>Ссылка неполная</h1>
+    <p class="bad">В ссылке нет кода приглашения или он обрезан.</p>
+    <p>Попроси того, кто тебя пригласил, прислать ссылку целиком. Само приложение можно скачать уже сейчас.</p>
+    <div class="buttons">
+      <a class="button primary" href="https://github.com/AfterAlotLies/pulse-releases/releases/latest">Скачать Pulse для Windows</a>
+    </div>
+  </section>
+</main>
+<script>
+  // Код — после «#»: браузер не отправляет его ни GitHub, ни куда-либо ещё. Страница ничего не загружает и не отправляет.
+  (function () {
+    var code = decodeURIComponent(location.hash.replace(/^#/, '')).trim();
+    if (!/^[A-Za-z0-9_-]{4,128}(\.[A-Za-z0-9_-]{43})?$/.test(code)) {
+      document.getElementById('bad').hidden = false;
+      return;
+    }
+    // Убрать код из адресной строки: меньше шансов, что его увидят на скриншоте.
+    history.replaceState(null, '', location.pathname);
+    var link = 'pulse://invite/' + code;
+    var open = document.getElementById('open');
+    open.href = link;
+    document.getElementById('ok').hidden = false;
+    var copy = document.getElementById('copy');
+    copy.addEventListener('click', function () {
+      var done = function () { copy.textContent = 'Код скопирован ✓'; };
+      if (navigator.clipboard) navigator.clipboard.writeText(code).then(done, fallback);
+      else fallback();
+      function fallback() {
+        var t = document.createElement('textarea');
+        t.value = code;
+        document.body.appendChild(t);
+        t.select();
+        try { document.execCommand('copy'); done(); } catch (e) { prompt('Скопируй код:', code); }
+        t.remove();
+      }
+    });
+    // Попробовать открыть приложение сразу; если Pulse не установлен, браузер просто останется на странице.
+    setTimeout(function () { location.href = link; }, 400);
+  })();
+</script>
+</body>
+</html>
